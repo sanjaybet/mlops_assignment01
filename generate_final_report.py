@@ -19,7 +19,8 @@ def add_section_heading(document, title):
 def add_image_with_caption(document, image_stream, caption):
     paragraph = document.add_paragraph()
     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    paragraph.add_run().add_picture(image_stream, width=Inches(6.25))
+    image_source = str(image_stream) if isinstance(image_stream, Path) else image_stream
+    paragraph.add_run().add_picture(image_source, width=Inches(6.25))
     caption_paragraph = document.add_paragraph(caption)
     caption_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
@@ -217,20 +218,32 @@ document.add_paragraph('The project uses GitHub Actions for automated validation
 document.add_paragraph('The pipeline is designed to fail clearly if any component of the workflow fails. This is important because production systems should not silently accept invalid code or broken environment assumptions. In the project, the workflow therefore acts as a guardrail by running the tests and model training automatically before the code is considered acceptable.')
 document.add_paragraph('The application is also containerized using Docker. The Dockerfile creates a slim Python environment, installs the project requirements, copies the source code, and starts the FastAPI server. This allows the project to be run consistently across local development, CI, and deployment environments. The container architecture is an essential MLOps practice because it minimizes environment drift and simplifies portability.')
 document.add_paragraph('Together, the GitHub Actions workflow and Docker configuration ensure both automation and reproducibility. This covers the assignment requirement for pipeline validation, deployment packaging, and environment consistency.')
-document.add_paragraph('The following report images are rendered captures of the checked-in configuration files. They document the implemented workflow and deployment settings; they are not screenshots of a hosted GitHub Actions run or a live Kubernetes cluster.')
+document.add_paragraph('GitHub Actions run #8 completed successfully on the main branch after pull request #4 was merged. Commit 98dfa02 passed the lint, test, and model-training steps in 57 seconds. The first two figures below are screenshots of the hosted run summary and its completed job steps. The subsequent Docker and Kubernetes figures are captures of checked-in configuration files, not evidence of a live deployment.')
+document.add_heading('Successful hosted GitHub Actions run', level=2)
+add_image_with_caption(
+    document,
+    PROJECT_DIR / 'screenshots' / 'CI-1.png',
+    'Figure 2. GitHub Actions run #8 succeeded on main at commit 98dfa02 (57 seconds).',
+)
+add_image_with_caption(
+    document,
+    PROJECT_DIR / 'screenshots' / 'CI-2.png',
+    'Figure 3. The lint-and-test job completed successfully, including lint, tests, and model training.',
+)
+document.add_paragraph('Run details: https://github.com/sanjaybet/mlops_assignment01/actions/runs/39002949584')
 document.add_heading('GitHub Actions workflow configuration', level=2)
 add_image_with_caption(
     document,
     render_source_capture(
         'CI workflow configuration', '.github/workflows/cicd.yaml', 1, 30
     ),
-    'Figure 2. Source capture of the CI workflow: Python setup, lint, tests, EDA, and training.',
+    'Figure 4. Source capture of the CI workflow: Python setup, lint, tests, EDA, and training.',
 )
 document.add_heading('Container image configuration', level=2)
 add_image_with_caption(
     document,
     render_source_capture('Docker image configuration', 'Dockerfile', 1, 20),
-    'Figure 3. Source capture of the Dockerfile used to package the FastAPI service.',
+    'Figure 5. Source capture of the Dockerfile used to package the FastAPI service.',
 )
 document.add_heading('Kubernetes deployment configuration', level=2)
 add_image_with_caption(
@@ -238,12 +251,12 @@ add_image_with_caption(
     render_source_capture(
         'Kubernetes Deployment configuration', 'k8s/deployment.yaml', 1, 40
     ),
-    'Figure 4. Source capture of the Kubernetes Deployment, replicas, ports, and health probes.',
+    'Figure 6. Source capture of the Kubernetes Deployment, replicas, ports, and health probes.',
 )
 add_image_with_caption(
     document,
     render_source_capture('Kubernetes Service configuration', 'k8s/service.yaml', 1, 30),
-    'Figure 5. Source capture of the LoadBalancer Service routing traffic to the API pods.',
+    'Figure 7. Source capture of the LoadBalancer Service routing traffic to the API pods.',
 )
 document.add_page_break()
 
