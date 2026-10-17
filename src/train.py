@@ -20,7 +20,11 @@ from sklearn.metrics import (
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+from sklearn.model_selection import (
+    GridSearchCV,
+    StratifiedKFold,
+    train_test_split,
+)
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import mlflow
 import mlflow.sklearn
@@ -106,7 +110,7 @@ def build_pipeline(classifier: Any) -> Pipeline:
 
 
 def save_model_atomically(pipeline: Pipeline, output_path: str) -> None:
-    """Save model pipeline atomically using temporary file to prevent partial writes."""
+    """Save model pipeline atomically to prevent partial writes."""
     output_dir = os.path.dirname(output_path) or "."
     os.makedirs(output_dir, exist_ok=True)
     temp_path = None
@@ -132,7 +136,7 @@ def train_and_evaluate_model(
     y_test: pd.Series,
     param_grid: Dict[str, Any],
 ) -> Tuple[Pipeline, float]:
-    """Tune by stratified CV, evaluate once on holdout, and log results to MLflow."""
+    """Tune using stratified CV and log holdout results to MLflow."""
     os.makedirs(PLOT_DIR, exist_ok=True)
 
     with mlflow.start_run(run_name=model_name):
@@ -164,8 +168,12 @@ def train_and_evaluate_model(
                 for metric in SCORING
             },
             "test_accuracy": float(accuracy_score(y_test, y_pred)),
-            "test_precision": float(precision_score(y_test, y_pred, zero_division=0)),
-            "test_recall": float(recall_score(y_test, y_pred, zero_division=0)),
+            "test_precision": float(
+                precision_score(y_test, y_pred, zero_division=0)
+            ),
+            "test_recall": float(
+                recall_score(y_test, y_pred, zero_division=0)
+            ),
             "test_f1": float(f1_score(y_test, y_pred, zero_division=0)),
             "test_roc_auc": float(roc_auc_score(y_test, y_proba)),
         }
