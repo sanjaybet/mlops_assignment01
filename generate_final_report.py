@@ -8,15 +8,40 @@ from docx import Document
 from docx.enum.section import WD_SECTION
 from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
+VIDEO_URL = 'https://drive.google.com/file/d/149757pNEOqkvSM3HhpsGu9iQHXtvTMpI/view?usp=sharing'
+REPOSITORY_URL = 'https://github.com/sanjaybet/mlops_assignment01'
+ACTION_RUN_URL = 'https://github.com/sanjaybet/mlops_assignment01/actions/runs/39002949584'
 
 
 def add_section_heading(document, title):
     document.add_heading(title, level=1)
+
+
+def add_hyperlink(paragraph, text, url):
+    relationship_id = paragraph.part.relate_to(
+        url,
+        'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink',
+        is_external=True,
+    )
+    hyperlink = OxmlElement('w:hyperlink')
+    hyperlink.set(qn('r:id'), relationship_id)
+    run = OxmlElement('w:r')
+    properties = OxmlElement('w:rPr')
+    style = OxmlElement('w:rStyle')
+    style.set(qn('w:val'), 'Hyperlink')
+    properties.append(style)
+    run.append(properties)
+    text_element = OxmlElement('w:t')
+    text_element.text = text
+    run.append(text_element)
+    hyperlink.append(run)
+    paragraph._p.append(hyperlink)
 
 
 def add_image_with_caption(document, image_stream, caption):
@@ -174,8 +199,10 @@ run.font.size = Pt(22)
 
 document.add_paragraph('Student Id: 2025ae05368')
 document.add_paragraph('Student Name: Sanjay. S. Betageri')
-document.add_paragraph('Repository: https://github.com/sanjaybet/mlops_assignment01')
-document.add_paragraph('Video demo link: Add video link here')
+repository_paragraph = document.add_paragraph('Repository: ')
+add_hyperlink(repository_paragraph, REPOSITORY_URL, REPOSITORY_URL)
+video_paragraph = document.add_paragraph('Video demo link: ')
+add_hyperlink(video_paragraph, VIDEO_URL, VIDEO_URL)
 document.add_paragraph('')
 
 add_section_heading(document, '1. Introduction and objective')
@@ -280,7 +307,8 @@ add_image_with_caption(
     PROJECT_DIR / 'screenshots' / 'CI-2.png',
     'Figure 3. The lint-and-test job completed successfully, including lint, tests, and model training.',
 )
-document.add_paragraph('Run details: https://github.com/sanjaybet/mlops_assignment01/actions/runs/39002949584')
+run_details = document.add_paragraph('Run details: ')
+add_hyperlink(run_details, ACTION_RUN_URL, ACTION_RUN_URL)
 document.add_heading('GitHub Actions workflow configuration', level=2)
 add_image_with_caption(
     document,
@@ -336,8 +364,10 @@ document.add_page_break()
 add_section_heading(document, '11. Documentation and reporting')
 document.add_paragraph('This report satisfies the documentation requirement for the assignment by presenting the setup instructions, data workflow, model decisions, experiment tracking summary, architecture overview, CI/CD and deployment process, and the repository link in a professional format. The document is structured to match the grading rubric and provides the evidence required for review by the instructor or examiner.')
 document.add_paragraph('The project includes the required technical documentation and deployment evidence within the repository and supporting files. The final written report is provided as a Word document and can be shared as a PDF if required. The report remains concise, professional, and aligned with the assignment brief while preserving the technical depth needed for assessment.')
-document.add_paragraph('Video demo link: Add video link here')
-document.add_paragraph('Repository link: https://github.com/sanjaybet/mlops_assignment01')
+video_paragraph = document.add_paragraph('Video demo link: ')
+add_hyperlink(video_paragraph, VIDEO_URL, VIDEO_URL)
+repository_paragraph = document.add_paragraph('Repository link: ')
+add_hyperlink(repository_paragraph, REPOSITORY_URL, REPOSITORY_URL)
 document.add_page_break()
 
 add_section_heading(document, '12. Deliverables checklist')
@@ -352,9 +382,11 @@ for item in [
     'Screenshot folder with visual outputs',
     'Final written report in Word/PDF format',
     'Local access instructions or public API URL',
-    'Video demo link (still to be added)',
 ]:
     document.add_paragraph(f'• {item}')
+
+video_item = document.add_paragraph('• Video demo: ')
+add_hyperlink(video_item, VIDEO_URL, VIDEO_URL)
 
 document.add_paragraph('')
 document.add_paragraph('Conclusion: The project was implemented and validated as a complete MLOps pipeline for heart disease prediction. It covers data acquisition, cleansing, experimentation, deployment, automation, and reporting in a way that aligns with the assignment specification and production-readiness expectations.')
