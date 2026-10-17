@@ -129,8 +129,9 @@ def run_eda() -> pd.DataFrame:
     print(f"Cleaned dataset saved to '{PROCESSED_DATA_PATH}'.")
     print(f"EDA visualizations saved to '{PLOT_DIR}'.")
     print(
-        "Missing feature values are preserved for imputation inside the training "
-        "pipeline, preventing statistics from leaking across cross-validation folds."
+        "Missing feature values are preserved for imputation inside "
+        "the training pipeline, preventing statistics from leaking "
+        "across cross-validation folds."
     )
     return cleaned_df
 

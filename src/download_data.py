@@ -30,8 +30,14 @@ COLUMN_NAMES = [
 ]
 
 
-def download_dataset(url: str = DATA_URL, output_path: str = RAW_DATA_PATH) -> pd.DataFrame:
-    """Download and validate the processed Cleveland data from the UCI archive."""
+def download_dataset(
+    url: str = DATA_URL,
+    output_path: str = RAW_DATA_PATH,
+) -> pd.DataFrame:
+    """Download and validate the processed Cleveland data.
+
+    Data is loaded from the UCI archive.
+    """
     output_dir = os.path.dirname(output_path) or "."
     os.makedirs(output_dir, exist_ok=True)
 
@@ -41,11 +47,17 @@ def download_dataset(url: str = DATA_URL, output_path: str = RAW_DATA_PATH) -> p
 
     with zipfile.ZipFile(io.BytesIO(archive_data)) as archive:
         data_path = next(
-            (name for name in archive.namelist() if name.endswith(DATA_FILE_NAME)),
+            (
+                name
+                for name in archive.namelist()
+                if name.endswith(DATA_FILE_NAME)
+            ),
             None,
         )
         if data_path is None:
-            raise ValueError(f"{DATA_FILE_NAME} was not found in the UCI archive")
+            raise ValueError(
+                f"{DATA_FILE_NAME} was not found in the UCI archive"
+            )
         with archive.open(data_path) as data_file:
             df = pd.read_csv(
                 data_file,
@@ -61,7 +73,9 @@ def download_dataset(url: str = DATA_URL, output_path: str = RAW_DATA_PATH) -> p
             f"({EXPECTED_ROWS}, {len(COLUMN_NAMES)})"
         )
     if not df["target"].isin([0, 1, 2, 3, 4]).all():
-        raise ValueError("Dataset contains unexpected values in the target column")
+        raise ValueError(
+            "Dataset contains unexpected values in the target column"
+        )
 
     temporary_path = None
     try:

@@ -33,7 +33,11 @@ def test_processed_dataset_has_binary_target():
 
 def test_trained_model_predicts_probabilities():
     model = load_model()
-    sample = pd.read_csv("data/processed/cleaned_heart.csv").drop(columns="target").head(2)
+    sample = (
+        pd.read_csv("data/processed/cleaned_heart.csv")
+        .drop(columns="target")
+        .head(2)
+    )
     predictions = model.predict(sample)
     probabilities = model.predict_proba(sample)
 
