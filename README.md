@@ -237,9 +237,9 @@ This project satisfies the major assignment deliverables as follows:
 | GitHub Actions workflow YAML | ✅ | [.github/workflows/cicd.yaml](.github/workflows/cicd.yaml) exists |
 | Deployment manifests | ✅ | [k8s/deployment.yaml](k8s/deployment.yaml) and [k8s/service.yaml](k8s/service.yaml) exist |
 | Screenshot folder | ✅ | [screenshots](screenshots) contains EDA and model plots |
-| Final written report in doc/docx/pdf format | ✅ | The final report is generated as a Word document in the project root as Final_Report.docx |
+| Final written report in doc/docx/pdf format | ✅ | The final report is provided as a Word document in the project root as 2025ae05368_mlops_assignment1_report.docx |
 | Deployed API URL or local access instructions | ✅ | Local access is documented in the setup section; the app can be started locally with uvicorn |
-| Short video recording of the pipeline | ⚠️ | This must be captured separately if the instructor requires a demo recording |
+| Video demo link | 📌 | Add the final video URL here after recording the pipeline walkthrough |
 
 ### Production-readiness verification
 The project also satisfies the production-readiness expectations stated in the assignment:
@@ -255,7 +255,9 @@ The project also satisfies the production-readiness expectations stated in the a
 
 GitHub repository link: https://github.com/sanjaybet/mlops_assignment01
 
-Final report document: Final_Report.docx
+Final report document: 2025ae05368_mlops_assignment1_report.docx
+
+Video demo link: Add video link here
 
 Project source files in this workspace:
 - [requirements.txt](requirements.txt)
@@ -280,7 +282,7 @@ Project source files in this workspace:
 | Experiment tracking summary | ✅ | Section 4 |
 | Architecture diagram | ✅ | Section 5 |
 | CI/CD and deployment workflow explanation | ✅ | Sections 6 and 7 |
-| Report in doc/docx/pdf format | ✅ | Final_Report.docx is included in the project root |
+| Report in doc/docx/pdf format | ✅ | 2025ae05368_mlops_assignment1_report.docx is included in the project root |
 | Code repository link | ✅ | Repository section above |
 | Deliverables checklist coverage | ✅ | Section 9 |
 
