@@ -209,8 +209,18 @@ document.add_page_break()
 add_section_heading(document, '7. Deployment of the prediction service')
 document.add_paragraph('Once the model was trained and validated, it was exposed through a FastAPI application. The prediction service receives patient information in JSON format, loads the serialized model artifact, and returns the disease prediction together with probability scores for both disease and no-disease classes. This API layer is the operational entry point for downstream users and stakeholders.')
 document.add_paragraph('The API implementation includes health-check endpoints and an inference endpoint. This design is useful for both local testing and deployment monitoring because it allows the service to be easily validated by a lightweight HTTP request. The service is designed to be stateless and portable, which makes it suitable for containerized deployment.')
-document.add_paragraph('The project includes local access instructions in the README and has been verified through smoke tests. This satisfies the deployment requirement that the model be served correctly in an isolated environment and that a working API can be exercised without a full production cluster. It also helps satisfy the assignment requirement for access instructions when a public URL is not available.')
-document.add_paragraph('When a public URL is not available, local instructions remain valid because they demonstrate how the application can be run and tested in a production-like environment. For academic submissions, this is usually accepted if the service has been proven to work locally and the instructions are clearly provided.')
+document.add_paragraph('The API was deployed to a local Minikube cluster running with the Docker driver in the Prayogshala virtual lab. The deployment reached two ready API replicas and one ready Prometheus replica. The API Service is Kubernetes type LoadBalancer; Minikube did not assign an external IP, so verification used kubectl port-forward, which is the documented local access path for this cluster.')
+document.add_paragraph('Runtime checks returned HTTP 200 from /health and /predict. The prediction response contained a binary class and probabilities for both classes. The /metrics endpoint exposed request counters, and a Prometheus query for up{job="heart-disease-api"} returned 1 for the API target. These screenshots document the observed lab run; they are evidence of local Kubernetes deployment, not a public cloud endpoint.')
+add_image_with_caption(
+    document,
+    PROJECT_DIR / 'screenshots' / 'Prayogshala-docker-kubernetes-1.png',
+    'Figure 8. Prayogshala Minikube deployment: API and Prometheus pods are ready; the local LoadBalancer has no external IP.',
+)
+add_image_with_caption(
+    document,
+    PROJECT_DIR / 'screenshots' / 'Prayogshala-kubernetes-API-Call.png',
+    'Figure 9. Successful health and prediction requests, with Prometheus-format API request counters.',
+)
 document.add_page_break()
 
 add_section_heading(document, '8. CI/CD and Dockerization')
@@ -218,7 +228,7 @@ document.add_paragraph('The project uses GitHub Actions for automated validation
 document.add_paragraph('The pipeline is designed to fail clearly if any component of the workflow fails. This is important because production systems should not silently accept invalid code or broken environment assumptions. In the project, the workflow therefore acts as a guardrail by running the tests and model training automatically before the code is considered acceptable.')
 document.add_paragraph('The application is also containerized using Docker. The Dockerfile creates a slim Python environment, installs the project requirements, copies the source code, and starts the FastAPI server. This allows the project to be run consistently across local development, CI, and deployment environments. The container architecture is an essential MLOps practice because it minimizes environment drift and simplifies portability.')
 document.add_paragraph('Together, the GitHub Actions workflow and Docker configuration ensure both automation and reproducibility. This covers the assignment requirement for pipeline validation, deployment packaging, and environment consistency.')
-document.add_paragraph('GitHub Actions run #8 completed successfully on the main branch after pull request #4 was merged. Commit 98dfa02 passed the lint, test, and model-training steps in 57 seconds. The first two figures below are screenshots of the hosted run summary and its completed job steps. The subsequent Docker and Kubernetes figures are captures of checked-in configuration files, not evidence of a live deployment.')
+document.add_paragraph('GitHub Actions run #8 completed successfully on the main branch after pull request #4 was merged. Commit 98dfa02 passed the lint, test, and model-training steps in 57 seconds. The first two figures below are screenshots of the hosted run summary and its completed job steps. The Dockerfile and Kubernetes configuration captures document the checked-in deployment setup; the Minikube runtime screenshots in Section 7 separately show the lab deployment.')
 document.add_heading('Successful hosted GitHub Actions run', level=2)
 add_image_with_caption(
     document,
@@ -260,8 +270,23 @@ add_image_with_caption(
 )
 document.add_page_break()
 
+add_section_heading(document, '8. Monitoring, logging, and runtime evidence')
+document.add_paragraph('The FastAPI application logs request method, path, status code, and duration to the container output stream without recording patient request bodies. Kubernetes captures these messages through pod logs. The Prometheus FastAPI instrumentator exposes HTTP request metrics at /metrics; the in-cluster Prometheus Deployment scrapes the API Service every 10 seconds.')
+document.add_paragraph('During the Prayogshala run, the API metrics output included successful request counters for /health, /metrics, and /predict. Prometheus returned a value of 1 for up{job="heart-disease-api"}, confirming that the configured target was reachable and being scraped. The first Prometheus capture shows the port-forward used to open its UI; the second shows the successful query and target value.')
+add_image_with_caption(
+    document,
+    PROJECT_DIR / 'screenshots' / 'Prometheus-1.png',
+    'Figure 10. Port-forward from the Prayogshala Minikube cluster to the Prometheus UI.',
+)
+add_image_with_caption(
+    document,
+    PROJECT_DIR / 'screenshots' / 'Prometheus-2.png',
+    'Figure 11. Prometheus query up{job="heart-disease-api"} returns 1 for the deployed API target.',
+)
+document.add_page_break()
+
 add_section_heading(document, '9. Production-readiness and compliance check')
-document.add_paragraph('The project was reviewed against the production-readiness requirements in the assignment. The first requirement is that all scripts should run from a clean setup using the requirements file; this is satisfied by the project configuration and environment instructions. The second requirement is that the model should serve correctly in an isolated environment; this is demonstrated by the Docker configuration and the API validation steps. The third requirement is that the pipeline should fail on code or test errors and provide clear logs; this is satisfied by the GitHub Actions workflow and the test suite, which exit non-zero on failure.')
+document.add_paragraph('The project was reviewed against the production-readiness requirements in the assignment. The container image was built and deployed to a local Minikube cluster using the Docker driver in the Prayogshala lab. API health, prediction, and metrics endpoints were exercised, and Prometheus reported the API scrape target as up. The GitHub Actions workflow runs linting, unit tests, EDA, and model training and exits on failures. The local cluster is session-scoped; the repository includes manifests and instructions to recreate it.')
 document.add_paragraph('In addition, the assignment requires the project to include the relevant repository artifacts, such as source code, training scripts, deployment manifests, tests, data artifacts, screenshots, and a final written report. These are all present in the project workspace or included as part of the documented setup. The project therefore satisfies the main functional and operational requirements for a complete MLOps assignment submission.')
 document.add_paragraph('The work therefore demonstrates both technical completeness and demonstration readiness. It is aligned with the assignment guidelines and provides the evidence needed for code review, deployment validation, and reporting.')
 document.add_page_break()
@@ -285,7 +310,7 @@ for item in [
     'Screenshot folder with visual outputs',
     'Final written report in Word/PDF format',
     'Local access instructions or public API URL',
-    'Video demo link placeholder',
+    'Video demo link (still to be added)',
 ]:
     document.add_paragraph(f'• {item}')
 
