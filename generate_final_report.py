@@ -1,12 +1,15 @@
 from io import BytesIO
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from docx import Document
+from docx.enum.section import WD_SECTION
+from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
-from docx.shared import Inches
+from docx.shared import Inches, Pt
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -23,6 +26,41 @@ def add_image_with_caption(document, image_stream, caption):
     paragraph.add_run().add_picture(image_source, width=Inches(6.25))
     caption_paragraph = document.add_paragraph(caption)
     caption_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+
+def add_landscape_screenshot_pages(document, screenshots):
+    for image_path, caption in screenshots:
+        section = document.add_section(WD_SECTION.NEW_PAGE)
+        section.orientation = WD_ORIENT.LANDSCAPE
+        section.page_width = Inches(11)
+        section.page_height = Inches(8.5)
+        section.top_margin = Inches(0.45)
+        section.bottom_margin = Inches(0.45)
+        section.left_margin = Inches(0.5)
+        section.right_margin = Inches(0.5)
+
+        paragraph = document.add_paragraph()
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        paragraph.paragraph_format.space_after = Inches(0.08)
+        paragraph.add_run().add_picture(
+            str(image_path),
+            width=Inches(6.25),
+            height=Inches(3.11),
+        )
+        caption_paragraph = document.add_paragraph(caption)
+        caption_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        caption_paragraph.paragraph_format.keep_together = True
+        caption_paragraph.paragraph_format.space_before = Inches(0.05)
+        caption_paragraph.paragraph_format.space_after = Inches(0)
+
+    section = document.add_section(WD_SECTION.NEW_PAGE)
+    section.orientation = WD_ORIENT.PORTRAIT
+    section.page_width = Inches(8.5)
+    section.page_height = Inches(11)
+    section.top_margin = Inches(1)
+    section.bottom_margin = Inches(1)
+    section.left_margin = Inches(1.25)
+    section.right_margin = Inches(1.25)
 
 
 def render_architecture_diagram():
@@ -130,12 +168,12 @@ document.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), 'Calibri')
 
 paragraph = document.add_paragraph()
 paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-run = paragraph.add_run('MLOps Assignment: Heart Disease Prediction Pipeline')
+run = paragraph.add_run('MLOps (S1-26_AIMLZG523) Assignment, 2026')
 run.bold = True
-run.font.size = 22
+run.font.size = Pt(22)
 
-document.add_paragraph('Student/Team Project Report')
-document.add_paragraph('Academic MLOps Assignment, 2026')
+document.add_paragraph('Student Id: 2025ae05368')
+document.add_paragraph('Student Name: Sanjay. S. Betageri')
 document.add_paragraph('Repository: https://github.com/sanjaybet/mlops_assignment01')
 document.add_paragraph('Video demo link: Add video link here')
 document.add_paragraph('')
@@ -211,17 +249,19 @@ document.add_paragraph('Once the model was trained and validated, it was exposed
 document.add_paragraph('The API implementation includes health-check endpoints and an inference endpoint. This design is useful for both local testing and deployment monitoring because it allows the service to be easily validated by a lightweight HTTP request. The service is designed to be stateless and portable, which makes it suitable for containerized deployment.')
 document.add_paragraph('The API was deployed to a local Minikube cluster running with the Docker driver in the Prayogshala virtual lab. The deployment reached two ready API replicas and one ready Prometheus replica. The API Service is Kubernetes type LoadBalancer; Minikube did not assign an external IP, so verification used kubectl port-forward, which is the documented local access path for this cluster.')
 document.add_paragraph('Runtime checks returned HTTP 200 from /health and /predict. The prediction response contained a binary class and probabilities for both classes. The /metrics endpoint exposed request counters, and a Prometheus query for up{job="heart-disease-api"} returned 1 for the API target. These screenshots document the observed lab run; they are evidence of local Kubernetes deployment, not a public cloud endpoint.')
-add_image_with_caption(
+add_landscape_screenshot_pages(
     document,
-    PROJECT_DIR / 'screenshots' / 'Prayogshala-docker-kubernetes-1.png',
-    'Figure 8. Prayogshala Minikube deployment: API and Prometheus pods are ready; the local LoadBalancer has no external IP.',
+    [
+        (
+            PROJECT_DIR / 'screenshots' / 'Prayogshala-docker-kubernetes-1.png',
+            'Figure 8. Prayogshala Minikube deployment: API and Prometheus pods are ready; the local LoadBalancer has no external IP.',
+        ),
+        (
+            PROJECT_DIR / 'screenshots' / 'Prayogshala-kubernetes-API-Call.png',
+            'Figure 9. Successful health and prediction requests, with Prometheus-format API request counters.',
+        ),
+    ],
 )
-add_image_with_caption(
-    document,
-    PROJECT_DIR / 'screenshots' / 'Prayogshala-kubernetes-API-Call.png',
-    'Figure 9. Successful health and prediction requests, with Prometheus-format API request counters.',
-)
-document.add_page_break()
 
 add_section_heading(document, '8. CI/CD and Dockerization')
 document.add_paragraph('The project uses GitHub Actions for automated validation. The workflow checks out the repository, installs the requirements, runs linting, executes tests, and then triggers the data processing and training pipeline. This is a standard continuous integration pattern and helps enforce quality standards on every change to the repository.')
@@ -270,35 +310,37 @@ add_image_with_caption(
 )
 document.add_page_break()
 
-add_section_heading(document, '8. Monitoring, logging, and runtime evidence')
+add_section_heading(document, '9. Monitoring, logging, and runtime evidence')
 document.add_paragraph('The FastAPI application logs request method, path, status code, and duration to the container output stream without recording patient request bodies. Kubernetes captures these messages through pod logs. The Prometheus FastAPI instrumentator exposes HTTP request metrics at /metrics; the in-cluster Prometheus Deployment scrapes the API Service every 10 seconds.')
 document.add_paragraph('During the Prayogshala run, the API metrics output included successful request counters for /health, /metrics, and /predict. Prometheus returned a value of 1 for up{job="heart-disease-api"}, confirming that the configured target was reachable and being scraped. The first Prometheus capture shows the port-forward used to open its UI; the second shows the successful query and target value.')
-add_image_with_caption(
+add_landscape_screenshot_pages(
     document,
-    PROJECT_DIR / 'screenshots' / 'Prometheus-1.png',
-    'Figure 10. Port-forward from the Prayogshala Minikube cluster to the Prometheus UI.',
+    [
+        (
+            PROJECT_DIR / 'screenshots' / 'Prometheus-1.png',
+            'Figure 10. Port-forward from the Prayogshala Minikube cluster to the Prometheus UI.',
+        ),
+        (
+            PROJECT_DIR / 'screenshots' / 'Prometheus-2.png',
+            'Figure 11. Prometheus query up{job="heart-disease-api"} returns 1 for the deployed API target.',
+        ),
+    ],
 )
-add_image_with_caption(
-    document,
-    PROJECT_DIR / 'screenshots' / 'Prometheus-2.png',
-    'Figure 11. Prometheus query up{job="heart-disease-api"} returns 1 for the deployed API target.',
-)
-document.add_page_break()
 
-add_section_heading(document, '9. Production-readiness and compliance check')
+add_section_heading(document, '10. Production-readiness and compliance check')
 document.add_paragraph('The project was reviewed against the production-readiness requirements in the assignment. The container image was built and deployed to a local Minikube cluster using the Docker driver in the Prayogshala lab. API health, prediction, and metrics endpoints were exercised, and Prometheus reported the API scrape target as up. The GitHub Actions workflow runs linting, unit tests, EDA, and model training and exits on failures. The local cluster is session-scoped; the repository includes manifests and instructions to recreate it.')
 document.add_paragraph('In addition, the assignment requires the project to include the relevant repository artifacts, such as source code, training scripts, deployment manifests, tests, data artifacts, screenshots, and a final written report. These are all present in the project workspace or included as part of the documented setup. The project therefore satisfies the main functional and operational requirements for a complete MLOps assignment submission.')
 document.add_paragraph('The work therefore demonstrates both technical completeness and demonstration readiness. It is aligned with the assignment guidelines and provides the evidence needed for code review, deployment validation, and reporting.')
 document.add_page_break()
 
-add_section_heading(document, '10. Documentation and reporting')
+add_section_heading(document, '11. Documentation and reporting')
 document.add_paragraph('This report satisfies the documentation requirement for the assignment by presenting the setup instructions, data workflow, model decisions, experiment tracking summary, architecture overview, CI/CD and deployment process, and the repository link in a professional format. The document is structured to match the grading rubric and provides the evidence required for review by the instructor or examiner.')
 document.add_paragraph('The project includes the required technical documentation and deployment evidence within the repository and supporting files. The final written report is provided as a Word document and can be shared as a PDF if required. The report remains concise, professional, and aligned with the assignment brief while preserving the technical depth needed for assessment.')
 document.add_paragraph('Video demo link: Add video link here')
 document.add_paragraph('Repository link: https://github.com/sanjaybet/mlops_assignment01')
 document.add_page_break()
 
-add_section_heading(document, '11. Deliverables checklist')
+add_section_heading(document, '12. Deliverables checklist')
 for item in [
     'GitHub repository with source code and model artifacts',
     'Dockerfile and dependency file',
@@ -317,7 +359,9 @@ for item in [
 document.add_paragraph('')
 document.add_paragraph('Conclusion: The project was implemented and validated as a complete MLOps pipeline for heart disease prediction. It covers data acquisition, cleansing, experimentation, deployment, automation, and reporting in a way that aligns with the assignment specification and production-readiness expectations.')
 
-output_path = '2025ae05368_mlops_assignment1_report.docx'
+output_path = os.environ.get(
+    'REPORT_OUTPUT_PATH', '2025ae05368_mlops_assignment1_report.docx'
+)
 if __name__ == '__main__':
     document.save(output_path)
     print(f'Created {output_path}')
