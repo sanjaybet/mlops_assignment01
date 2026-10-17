@@ -3,10 +3,12 @@ from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from src.predict import predict_single_record
 
 app = FastAPI(title="Heart Disease Prediction API", version="1.0.0")
+Instrumentator().instrument(app).expose(app, include_in_schema=False)
 
 
 class PatientRecord(BaseModel):
