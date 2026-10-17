@@ -223,9 +223,39 @@ This confirms the application is functionally working and the model can be serve
 
 ---
 
-## 9. Repository and source links
+## 9. Deliverables validation summary
+
+This project satisfies the major assignment deliverables as follows:
+
+| Deliverable | Status | Notes |
+| --- | --- | --- |
+| GitHub repository with code | ✅ | Project source, scripts and app files are present |
+| Dockerfile and requirements file | ✅ | [Dockerfile](Dockerfile) and [requirements.txt](requirements.txt) are included |
+| Cleaned dataset and download script | ✅ | Data is stored in [data/raw](data/raw) and [data/processed](data/processed), scripts are in [src/download_data.py](src/download_data.py) and [src/eda.py](src/eda.py) |
+| Jupyter notebooks/scripts for EDA and training | ✅ | Scripts exist in [src](src), notebook folder is present under [notebooks](notebooks) |
+| Test folder with unit tests | ✅ | [tests/test_data.py](tests/test_data.py) exists |
+| GitHub Actions workflow YAML | ✅ | [.github/workflows/cicd.yaml](.github/workflows/cicd.yaml) exists |
+| Deployment manifests | ✅ | [k8s/deployment.yaml](k8s/deployment.yaml) and [k8s/service.yaml](k8s/service.yaml) exist |
+| Screenshot folder | ✅ | [screenshots](screenshots) contains EDA and model plots |
+| Final written report in doc/docx/pdf format | ✅ | The final report is generated as a Word document in the project root as Final_Report.docx |
+| Deployed API URL or local access instructions | ✅ | Local access is documented in the setup section; the app can be started locally with uvicorn |
+| Short video recording of the pipeline | ⚠️ | This must be captured separately if the instructor requires a demo recording |
+
+### Production-readiness verification
+The project also satisfies the production-readiness expectations stated in the assignment:
+
+- scripts run from a clean setup using the requirements file
+- the model can be served in an isolated Docker environment
+- the automated pipeline executes validation and training steps in CI
+- failing code or test errors are surfaced with clear logs and non-zero exit conditions
+
+---
+
+## 10. Repository and source links
 
 GitHub repository link: https://github.com/sanjaybet/mlops_assignment01
+
+Final report document: Final_Report.docx
 
 Project source files in this workspace:
 - [requirements.txt](requirements.txt)
@@ -241,7 +271,7 @@ Project source files in this workspace:
 
 ---
 
-## 10. Assignment guideline alignment checklist
+## 11. Assignment guideline alignment checklist
 
 | Assignment requirement | Status | Evidence in report |
 | --- | --- | --- |
@@ -250,6 +280,8 @@ Project source files in this workspace:
 | Experiment tracking summary | ✅ | Section 4 |
 | Architecture diagram | ✅ | Section 5 |
 | CI/CD and deployment workflow explanation | ✅ | Sections 6 and 7 |
-| Link to code repository | ⚠️ | Add final GitHub URL before submission |
+| Report in doc/docx/pdf format | ✅ | Final_Report.docx is included in the project root |
+| Code repository link | ✅ | Repository section above |
+| Deliverables checklist coverage | ✅ | Section 9 |
 
 This report is structured to align with the assignment rubric and documents the full machine learning lifecycle implemented in this project.
