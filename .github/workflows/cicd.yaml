@@ -28,7 +28,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -q
+          python -m pytest -q
 
       - name: Train model
         run: |
