@@ -56,6 +56,22 @@ docker build -t heart-disease-api .
 docker run -p 8000:8000 heart-disease-api
 ```
 
+### Deploy to Docker Desktop Kubernetes (Windows)
+Run PowerShell as Administrator for the first run so the script can install Docker Desktop and `kubectl` with `winget`:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\deploy-docker-desktop.ps1
+```
+
+When Docker Desktop opens, enable Kubernetes under **Settings > Kubernetes**, apply the change, and return to the script. It builds the API image, deploys the API and a lightweight in-cluster Prometheus, and verifies that Prometheus scrapes the API successfully. It also checks `/health`, `/predict`, and `/metrics` over local port-forwards, then saves metrics, prediction, and Prometheus scrape screenshots plus API logs under `screenshots/deployment/`. Keep the PowerShell session open while using the forwarded endpoints. Kubernetes request logs can also be queried with:
+
+```powershell
+kubectl logs -l app=heart-disease-api --all-containers=true --prefix=true --tail=50
+```
+
+The API pod has Prometheus scrape annotations for `/metrics`; the local Prometheus manifest also has an explicit scrape target, so it does not depend on annotation discovery.
+
 ---
 
 ## 2. Data acquisition and EDA
