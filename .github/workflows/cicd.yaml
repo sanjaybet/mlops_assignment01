@@ -36,3 +36,15 @@ jobs:
         run: |
           python src/eda.py
           python src/train.py
+
+      - name: Upload training artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlops-run-${{ github.run_id }}
+          path: |
+            .mlflow-ci/
+            screenshots/*.png
+            data/processed/model.joblib
+          if-no-files-found: warn
+          retention-days: 14

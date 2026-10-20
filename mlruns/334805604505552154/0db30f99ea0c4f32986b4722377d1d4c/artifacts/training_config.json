@@ -1,0 +1,21 @@
+{
+  "random_state": 42,
+  "test_size": 0.2,
+  "search_scoring": [
+    "accuracy",
+    "precision",
+    "recall",
+    "f1",
+    "roc_auc"
+  ],
+  "parameter_grid": {
+    "classifier__C": [
+      0.1,
+      1.0,
+      10.0
+    ]
+  },
+  "best_parameters": {
+    "classifier__C": 1.0
+  }
+}

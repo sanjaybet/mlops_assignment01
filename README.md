@@ -40,6 +40,22 @@ python src/eda.py
 python src/train.py
 ```
 
+### Run the notebooks
+Open the notebooks in VS Code or Jupyter and execute cells from top to bottom. They reuse the repository scripts and trained artifacts:
+
+- `notebooks/01_eda.ipynb`: download-if-needed, clean, inspect, and visualize the Cleveland dataset.
+- `notebooks/02_training_and_mlflow.ipynb`: train both candidate models, log MLflow runs, and compare recorded metrics.
+- `notebooks/03_inference.ipynb`: load the saved pipeline and predict for a sample patient record.
+
+### Generate the Word report
+The report generator is included in the project requirements:
+
+```powershell
+python generate_final_report.py
+```
+
+The GitHub Actions workflow retains MLflow files, generated plots, and the trained model as a downloadable artifact for each workflow run.
+
 ### Run the API locally
 ```powershell
 uvicorn app.main:app --host 0.0.0.0 --port 8001
