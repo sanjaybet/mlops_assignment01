@@ -44,6 +44,28 @@ def add_hyperlink(paragraph, text, url):
     paragraph._p.append(hyperlink)
 
 
+def add_table_of_contents(document):
+    document.add_heading('Table of Contents', level=1)
+    paragraph = document.add_paragraph()
+    run = paragraph.add_run()
+
+    instruction = OxmlElement('w:instrText')
+    instruction.set(qn('xml:space'), 'preserve')
+    instruction.text = ' TOC \\o "1-2" \\h \\z \\u '
+    placeholder = OxmlElement('w:t')
+    placeholder.text = 'Open in Word and update the field to populate the table of contents.'
+
+    for field_type in ('begin', 'separate'):
+        field_char = OxmlElement('w:fldChar')
+        field_char.set(qn('w:fldCharType'), field_type)
+        run._r.append(field_char)
+    run._r.append(instruction)
+    run._r.append(placeholder)
+    field_end = OxmlElement('w:fldChar')
+    field_end.set(qn('w:fldCharType'), 'end')
+    run._r.append(field_end)
+
+
 def add_image_with_caption(document, image_stream, caption):
     paragraph = document.add_paragraph()
     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -190,53 +212,109 @@ def render_source_capture(title, relative_path, start_line=1, end_line=None):
 document = Document()
 document.styles['Normal'].font.name = 'Calibri'
 document.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), 'Calibri')
+update_fields = OxmlElement('w:updateFields')
+update_fields.set(qn('w:val'), 'true')
+document.settings.element.append(update_fields)
 
 paragraph = document.add_paragraph()
 paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+paragraph.paragraph_format.space_before = Pt(105)
+paragraph.paragraph_format.space_after = Pt(10)
 run = paragraph.add_run('MLOps (S1-26_AIMLZG523) Assignment, 2026')
 run.bold = True
 run.font.size = Pt(22)
 
-document.add_paragraph('Student Id: 2025ae05368')
-document.add_paragraph('Student Name: Sanjay. S. Betageri')
-repository_paragraph = document.add_paragraph('Repository: ')
+paragraph = document.add_paragraph()
+paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+paragraph.paragraph_format.space_after = Pt(34)
+run = paragraph.add_run('Heart Disease Prediction Pipeline')
+run.bold = True
+run.font.size = Pt(16)
+
+for label, value in [
+    ('Student Id: ', '2025ae05368'),
+    ('Student Name: ', 'Sanjay. S. Betageri'),
+]:
+    paragraph = document.add_paragraph()
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    paragraph.paragraph_format.space_after = Pt(6)
+    paragraph.add_run(label).bold = True
+    paragraph.add_run(value)
+
+repository_paragraph = document.add_paragraph()
+repository_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+repository_paragraph.add_run('Repository: ').bold = True
 add_hyperlink(repository_paragraph, REPOSITORY_URL, REPOSITORY_URL)
-video_paragraph = document.add_paragraph('Video demo link: ')
+video_paragraph = document.add_paragraph()
+video_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+video_paragraph.add_run('Video demo link: ').bold = True
 add_hyperlink(video_paragraph, VIDEO_URL, VIDEO_URL)
-document.add_paragraph('')
+
+paragraph = document.add_paragraph()
+paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+paragraph.paragraph_format.space_before = Pt(26)
+paragraph.paragraph_format.space_after = Pt(6)
+run = paragraph.add_run('Environment: Prayogshala and local setup')
+run.bold = True
+run.font.size = Pt(13)
+
+paragraph = document.add_paragraph(
+    'Deployment validation was performed in the Prayogshala virtual lab; '
+    'the project can also be set up and run locally using the documented '
+    'Python environment.'
+)
+paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+paragraph.paragraph_format.left_indent = Inches(0.7)
+paragraph.paragraph_format.right_indent = Inches(0.7)
+paragraph.paragraph_format.space_after = Pt(0)
+document.add_page_break()
+
+add_table_of_contents(document)
+document.add_page_break()
 
 add_section_heading(document, '1. Introduction and objective')
-document.add_paragraph('This report documents the design, implementation, and validation of a reproducible machine learning solution for heart disease prediction using the UCI Cleveland Heart Disease dataset. The project follows the core principles of Machine Learning Operations (MLOps) by integrating data ingestion, cleaning, feature engineering, experimentation, model deployment, testing, automation, and containerization into a single end-to-end workflow.')
-document.add_paragraph('The objective was to build a production-style machine learning pipeline that could be run from a clean environment, validated through automated tests, and exposed via a prediction API. The project emphasizes reproducibility, traceability, automated deployment readiness, and operational observability using modern tools such as Python, scikit-learn, MLflow, FastAPI, Docker, Kubernetes manifests, and GitHub Actions.')
-document.add_paragraph('The assignment required not only the creation of a functioning model, but also the ability to package it for service deployment and CI validation. This is why the solution contains both a training pipeline and a serving layer, and why production-readiness checks were incorporated into the workflow.')
-document.add_page_break()
+document.add_paragraph('This report presents a reproducible heart disease prediction solution using the UCI Cleveland dataset. Its MLOps workflow covers data ingestion and cleaning, model development and tracking, API serving, deployment, testing, and automation.')
+document.add_paragraph('The objective was to build a pipeline that can be recreated from a clean environment, validated automatically, and served through a prediction API using Python, scikit-learn, MLflow, FastAPI, Docker, Kubernetes, and GitHub Actions.')
 
 add_section_heading(document, '2. Environment and setup')
-document.add_paragraph('The project was implemented in a dedicated Python virtual environment to ensure dependency isolation and repeatability. The environment includes the core data science stack, model training libraries, FastAPI, MLflow, and testing dependencies. A local setup requires Python 3.12, pip, Docker, and Git. The project dependency list is captured in requirements.txt so that the environment can be reconstructed cleanly from a fresh machine.')
-document.add_paragraph('The installation and setup commands are included in the project README. The virtual environment was activated before running the project scripts, and a clean installation workflow was used to avoid manual package discrepancies across local or CI environments. This approach follows the reproducibility requirement in the assignment, which emphasizes that all scripts should be executable from a clean setup using the requirements file.')
-document.add_paragraph('The environment configuration also addressed an MLflow compatibility issue caused by a setuptools version conflict. This was resolved by pinning setuptools<81 in the requirements file. This demonstrates a practical MLOps consideration: package compatibility and environment stability are critical for reliable training and deployment.')
-document.add_paragraph('The setup therefore covers both developer ergonomics and deployment consistency. This is a key requirement for production-like systems, where environment drift is a major source of failure.')
-document.add_page_break()
+document.add_paragraph('The project uses an isolated Python 3.12 virtual environment. Dependencies for data processing, training, MLflow, FastAPI, testing, and report generation are listed in requirements.txt; setup commands are documented in README.md.')
+document.add_paragraph('The requirements pin setuptools below version 81 to avoid an MLflow compatibility conflict. Recreating the environment from the requirements file supports consistent local and CI runs.')
+document.add_heading('Steps to run the code', level=2)
+run_commands = (
+    'cd ~/workspace/mlops_assignment01\n\n'
+    '# Create and activate the environment\n'
+    'python -m venv .venv\n'
+    'source .venv/bin/activate\n\n'
+    '# Install project dependencies\n'
+    'python -m pip install --upgrade pip\n'
+    'pip install -r requirements.txt\n\n'
+    '# Download data, clean it, then train and log experiments\n'
+    'python src/download_data.py\n'
+    'python src/eda.py\n'
+    'python src/train.py\n\n'
+    '# Start the prediction API\n'
+    'uvicorn app.main:app --host 0.0.0.0 --port 8001'
+)
+commands_paragraph = document.add_paragraph()
+commands_paragraph.paragraph_format.left_indent = Inches(0.15)
+commands_paragraph.paragraph_format.space_before = Pt(2)
+commands_paragraph.paragraph_format.space_after = Pt(4)
+commands_run = commands_paragraph.add_run(run_commands)
+commands_run.font.name = 'Consolas'
+commands_run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Consolas')
+commands_run.font.size = Pt(8)
 
 add_section_heading(document, '3. Data acquisition and validation')
-document.add_paragraph('The first major stage was data acquisition. The project uses the official UCI Heart Disease dataset, which is downloaded from the public source archive and stored under the raw-data directory. This ensures that the training dataset is reproducible and traceable, rather than relying on ad hoc local copies or manually edited files.')
-document.add_paragraph('The download workflow is implemented in the data acquisition script. It obtains the dataset archive, extracts the Cleveland records, validates the expected schema, and confirms that the dataset has the necessary rows and columns. The dataset checks ensure the pipeline fails early if the raw source is incomplete or malformed. This principle is consistent with production systems, which must gracefully detect invalid upstream data before training begins.')
-document.add_paragraph('The raw dataset was verified to contain the expected number of rows and the standard feature columns used in the heart disease problem. This validation is important because downstream modelling decisions depend on a correct and consistent dataset schema. Without schema validation, a single missing or renamed feature can cause silent model errors and unreliable outputs.')
-document.add_paragraph('This stage also satisfies the deliverable requirement for a clean dataset and download script instructions. The dataset, raw data location, and instructions for running the acquisition process are all included in the repository and documentation.')
-document.add_page_break()
+document.add_paragraph('The acquisition script downloads the official UCI Heart Disease archive, extracts the Cleveland data, and validates its expected schema and records before use. This makes the raw input traceable and causes malformed or incomplete data to fail early.')
+document.add_paragraph('The raw and processed data, download script, and run instructions are included in the repository.')
 
 add_section_heading(document, '4. Exploratory data analysis and preprocessing')
-document.add_paragraph('After data acquisition, the project performs exploratory data analysis and preprocessing. The analysis pipeline checks the schema, validates target values, and maps the original multi-class disease labels to a binary classification target. Specifically, the original target levels 0 to 4 are mapped so that 0 is classified as no disease and values from 1 to 4 are treated as disease present.')
-document.add_paragraph('This binary mapping is central to the assignment because the objective is a binary prediction problem. The cleaned dataset is then saved in the processed-data folder for downstream use by the training scripts. This conversion ensures the classification task aligns with the intended predictive objective and avoids ambiguity in model interpretation.')
-document.add_paragraph('The project also produces a range of EDA visualizations, including feature histograms, class balance plots, and correlation heatmaps. These diagnostic plots help confirm feature distribution quality, detect imbalance or anomalies, and support modelling decisions. In a production workflow, this stage is crucial because it enables early identification of data quality issues before expensive model training takes place.')
-document.add_paragraph('The implementation uses preprocessing pipelines designed with leakage awareness. Numeric features are imputed and scaled, while categorical features are imputed and one-hot encoded. This design is preferred over manual feature preprocessing because it keeps the transformation logic inside the training pipeline and ensures consistent behaviour in both training and inference.')
-document.add_page_break()
+document.add_paragraph('The EDA workflow validates the schema and target, removes duplicate records, and maps target 0 to “no disease” and targets 1–4 to “disease present.” It saves the cleaned dataset for training and generates feature-distribution, class-balance, and correlation plots.')
+document.add_paragraph('Missing feature values are retained for fold-local imputation in the training pipeline. Numeric features are imputed and scaled; categorical features are imputed and one-hot encoded, preventing preprocessing leakage across validation folds.')
 
 add_section_heading(document, '5. Model development and evaluation')
-document.add_paragraph('The model development stage compares multiple candidate classifiers before selecting a final champion. The project evaluates Logistic Regression and Random Forest classifiers using a stratified cross-validation approach and a holdout validation set. This is a principled model selection strategy because it reduces the risk of overfitting and gives a realistic estimate of generalization performance.')
-document.add_paragraph('The training script builds a preprocessing pipeline for each candidate model. The pipeline includes imputation, scaling, encoding, and the classifier itself. This ensures that all transformations are learned only on training data during the cross-validation loops, which prevents data leakage from the validation folds into the training process.')
-document.add_paragraph('The model selection metric used for comparison is the cross-validated ROC-AUC score, which is appropriate for binary classification tasks and reflects the ability of the classifier to distinguish between classes. After comparing the candidate models, the project selects the champion based on the best validation performance and then evaluates that model on the holdout test set. This is a standard and reliable approach in applied ML workflows.')
-document.add_paragraph('The project also saves confusion matrices and ROC curves so that the performance of each model can be inspected visually. These artifacts were included in the screenshot folder and used to support the reporting requirement. They provide evidence that the model not only classifies samples, but does so with a useful discrimination threshold and interpretable error patterns.')
+document.add_paragraph('Logistic Regression and Random Forest are compared using stratified five-fold cross-validation and a holdout test set. Preprocessing (imputation, scaling, and encoding) is fitted within each pipeline fold to prevent data leakage. Hyperparameters are selected by cross-validated ROC-AUC; the holdout set is reserved for final reporting.')
+document.add_paragraph('Confusion matrices and ROC curves are saved for both candidates to support review of their classification performance.')
 document.add_heading('End-to-end architecture', level=2)
 document.add_paragraph('The architecture connects validated UCI data to preprocessing and model selection, records experiment evidence in MLflow, and packages the selected inference pipeline behind FastAPI. GitHub Actions automates linting, tests, preprocessing, and training; Docker and Kubernetes provide the deployment path.')
 add_image_with_caption(
@@ -247,9 +325,8 @@ add_image_with_caption(
 document.add_page_break()
 
 add_section_heading(document, '6. MLflow experiment tracking')
-document.add_paragraph('MLflow is a core component of the project and is used to record experiment metadata, training metrics, and model artifacts. The training workflow logs the experiment name, hyperparameters, data preparation choices, validation scores, plots, and the final serialized model. This is essential for establishing a reproducible machine learning process, where every run can be traced and compared.')
-document.add_paragraph('In this project, the MLflow experiment tracks the candidate classifiers and records the relevant metrics for each run. By logging cross-validation results, the project preserves the evidence used for model selection. This is particularly important in MLOps because it creates a traceable model history rather than leaving performance results only in an ad hoc console output.')
-document.add_paragraph('The local MLflow experiment contains runs for Logistic Regression and Random Forest. Hyperparameters were selected using stratified five-fold cross-validation with ROC-AUC as the refit and model-selection metric. The saved run records show the following comparison:')
+document.add_paragraph('MLflow records each candidate’s parameters, preprocessing choices, cross-validation and holdout metrics, tuning results, plots, configuration, and fitted model. This preserves the evidence behind model selection and supports repeatable comparison.')
+document.add_paragraph('The recorded runs show the following ROC-AUC comparison:')
 tracking_table = document.add_table(rows=1, cols=3)
 tracking_table.style = 'Light Shading Accent 1'
 for cell, heading in zip(
@@ -265,11 +342,7 @@ for model_name, cv_auc, test_auc in [
     cells[0].text = model_name
     cells[1].text = cv_auc
     cells[2].text = test_auc
-document.add_paragraph('Random Forest is the selected champion because its cross-validation ROC-AUC is higher (0.9030 versus 0.9025). Holdout scores are reported as an independent final evaluation and are not used to choose the model.')
-document.add_paragraph('Each run records model and preprocessing parameters, mean CV and holdout accuracy, precision, recall, F1, and ROC-AUC, the selection-metric and dataset tags, a training configuration JSON file, tuning results CSV, confusion matrix and ROC plot artifacts, and the fitted scikit-learn pipeline. The deployment copy is also saved as data/processed/model.joblib.')
-document.add_paragraph('The experiment tracking layer also supports governance and collaboration. If multiple people are working on the same model, MLflow allows them to review parameters, compare runs, and identify the exact configuration that produced the best result. This is a recurring requirement in production MLOps pipelines, where model lineage and auditability matter.')
-document.add_paragraph('The final artifact is a saved model pipeline that can be reloaded for inference, enabling a clear distinction between experimentation and deployment. This separation is a key practice in robust machine learning systems.')
-document.add_page_break()
+document.add_paragraph('Random Forest is the champion by CV ROC-AUC (0.9030 vs. 0.9025). Holdout ROC-AUC is reported independently and does not determine selection. The selected pipeline is saved to data/processed/model.joblib for inference.')
 
 add_section_heading(document, '7. Deployment of the prediction service')
 document.add_paragraph('Once the model was trained and validated, it was exposed through a FastAPI application. The prediction service receives patient information in JSON format, loads the serialized model artifact, and returns the disease prediction together with probability scores for both disease and no-disease classes. This API layer is the operational entry point for downstream users and stakeholders.')
@@ -356,19 +429,15 @@ add_landscape_screenshot_pages(
 )
 
 add_section_heading(document, '10. Production-readiness and compliance check')
-document.add_paragraph('The project was reviewed against the production-readiness requirements in the assignment. The container image was built and deployed to a local Minikube cluster using the Docker driver in the Prayogshala lab. API health, prediction, and metrics endpoints were exercised, and Prometheus reported the API scrape target as up. The GitHub Actions workflow runs linting, unit tests, EDA, and model training and exits on failures. The local cluster is session-scoped; the repository includes manifests and instructions to recreate it.')
-document.add_paragraph('In addition, the assignment requires the project to include the relevant repository artifacts, such as source code, training scripts, deployment manifests, tests, data artifacts, screenshots, and a final written report. These are all present in the project workspace or included as part of the documented setup. The project therefore satisfies the main functional and operational requirements for a complete MLOps assignment submission.')
-document.add_paragraph('The work therefore demonstrates both technical completeness and demonstration readiness. It is aligned with the assignment guidelines and provides the evidence needed for code review, deployment validation, and reporting.')
-document.add_page_break()
+document.add_paragraph('The container was deployed to Prayogshala Minikube. Health, prediction, and metrics endpoints were checked, and Prometheus confirmed the API target was up. CI runs linting, tests, EDA, and training. The local cluster is session-scoped; the repository contains the manifests and instructions to recreate it.')
+document.add_paragraph('The repository includes the source, scripts, model/data artifacts, tests, deployment manifests, screenshots, and report required for review.')
 
 add_section_heading(document, '11. Documentation and reporting')
-document.add_paragraph('This report satisfies the documentation requirement for the assignment by presenting the setup instructions, data workflow, model decisions, experiment tracking summary, architecture overview, CI/CD and deployment process, and the repository link in a professional format. The document is structured to match the grading rubric and provides the evidence required for review by the instructor or examiner.')
-document.add_paragraph('The project includes the required technical documentation and deployment evidence within the repository and supporting files. The final written report is provided as a Word document and can be shared as a PDF if required. The report remains concise, professional, and aligned with the assignment brief while preserving the technical depth needed for assessment.')
+document.add_paragraph('This report summarizes setup, data processing, model selection, tracking, deployment, CI/CD, and validation evidence. The Word report and supporting repository documentation are included for assessment.')
 video_paragraph = document.add_paragraph('Video demo link: ')
 add_hyperlink(video_paragraph, VIDEO_URL, VIDEO_URL)
 repository_paragraph = document.add_paragraph('Repository link: ')
 add_hyperlink(repository_paragraph, REPOSITORY_URL, REPOSITORY_URL)
-document.add_page_break()
 
 add_section_heading(document, '12. Deliverables checklist')
 for item in [

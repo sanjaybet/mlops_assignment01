@@ -1,0 +1,15 @@
+artifact_uri: file:///D:/Docs/Edu/3rd-sem/mlops/assignment-1/mlops_assignment01/mlruns/334805604505552154/0db30f99ea0c4f32986b4722377d1d4c/artifacts
+end_time: 1792476350185
+entry_point_name: ''
+experiment_id: '334805604505552154'
+lifecycle_stage: active
+run_id: 0db30f99ea0c4f32986b4722377d1d4c
+run_name: Logistic Regression
+run_uuid: 0db30f99ea0c4f32986b4722377d1d4c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1792476332332
+status: 3
+tags: []
+user_id: z004na8z
